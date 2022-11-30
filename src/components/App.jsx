@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 
 import { getPhotoByName } from '../services/Api';
@@ -8,100 +8,91 @@ import Loader from "./Loader/Loader";
 import Button from "./Button/Button";
 import Modal from "./Modal/Modal";
 
-export class App extends React.Component {
+const App = () => {
 
-  state = {
-    name: '',
-    photos: [],
-    isLoading: false,
-    error: '',
-    page: 1,
-    largeImage: '',
-  };
+  const [name, setName] = useState('');
+  const [photos, setPhotos] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [page, setPage] = useState(1);
+  const [largeImage, setLargeImage] = useState('');
+
 
   static defaultProps = {
-    images: [],
-  };
+  photos: [],
+};
 
   static propTypes = {
-    images: PropTypes.arrayOf(PropTypes.object).isRequired,
-  };
-
-  componentDidMount() {
-    window.addEventListener('keydown', this.closeModalByEscape);
-  }
-
-  closeModalByEscape = (event) => {
-    if (event.code === 'Escape') {
-      this.setState({ largeImage: '' });
-    }
-  };
-
-  componentDidUpdate(_, prevState) {
-
-    if (prevState.name !== this.state.name || prevState.page !== this.state.page) {
-      const fetchPhotoByName = async name => {
-        try {
-          this.setState({ isLoading: true });
-          const photoByName = await getPhotoByName(name, this.state.page);
-          this.setState(prevState => ({ photos: [...prevState.photos, ...photoByName] }));
-        } catch (err) {
-          this.setState({
-            error: err.message,
-          });
-        } finally {
-          this.setState({ isLoading: false });
-        }
-      };
-
-      fetchPhotoByName(this.state.name);
-    }
-  }
-
-  componentWillUnmount() {
-    window.removeEventListener('keydown', this.closeModalByEscape);
-  }
-
-  onSelectName = name => {
-    this.setState({ name: name, photos: [], page: 1 });
-  };
-
-  onClickBtn = () => {
-    this.setState({ page: this.state.page + 1 });
-  }
-
-  onClickImage = (src) => {
-    this.setState({ largeImage: src })
-  }
-
-  onCloseModal = () => {
-    this.setState({ largeImage: '' })
-  }
-
-
-  render() {
-    console.log(this.state.page)
-    return (
-      <div
-        style={{
-
-          display: 'grid',
-          gridTemplateColumns: '1fr',
-          gridGap: 16,
-          paddingBottom: 24,
-        }}>
-        <Searchbar onSelectName={this.onSelectName} />
-        {this.state.error.length > 0 && (
-          <p>
-            Upss, Some error occured... {this.state.error}
-          </p>
-        )}
-        {this.state.isLoading && <Loader />}
-        <ImageGallery photos={this.state.photos} onClick={this.onClickImage} />
-        {this.state.photos.length > 0 && <Button onClick={this.onClickBtn} />}
-        {!!this.state.largeImage.length && <Modal onClose={this.onCloseModal} largeImage={this.state.largeImage} />}
-      </div>
-    );
-  }
-
+  photos: PropTypes.arrayOf(PropTypes.object).isRequired,
 };
+
+useEffect(() => { window.addEventListener('keydown', closeModalByEscape); }, []);
+
+const closeModalByEscape = (event) => {
+  if (event.code === 'Escape') {
+    setLargeImage('');
+  }
+};
+
+useEffect(() => {
+  if (!name.length) return;
+
+  const fetchPhotoByName = async name => {
+    try {
+      setIsLoading(true);
+      const photoByName = await getPhotoByName(name, page);
+      setPhotos(prevState => [...prevState.photos, ...photoByName]);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  fetchPhotoByName(name);
+}, [name, page]);
+
+useEffect(() => {
+  window.removeEventListener('keydown', closeModalByEscape);
+}, [])
+
+const onSelectName = name => {
+  this.setState({ name: name, photos: [], page: 1 });
+};
+
+const onClickBtn = () => {
+  setPage(page + 1);
+}
+
+const onClickImage = (src) => {
+  setLargeImage(src)
+}
+
+const onCloseModal = () => {
+  setLargeImage('')
+}
+
+return (
+  <div
+    style={{
+
+      display: 'grid',
+      gridTemplateColumns: '1fr',
+      gridGap: 16,
+      paddingBottom: 24,
+    }}>
+    <Searchbar onSelectName={onSelectName} />
+    {error.length > 0 && (
+      <p>
+        Upss, Some error occured... {error}
+      </p>
+    )}
+    {isLoading && <Loader />}
+    <ImageGallery photos={photos} onClick={onClickImage} />
+    {photos.length > 0 && <Button onClick={onClickBtn} />}
+    {!!largeImage.length && <Modal onClose={onCloseModal} largeImage={largeImage} />}
+  </div>
+);
+};
+
+export { App };
