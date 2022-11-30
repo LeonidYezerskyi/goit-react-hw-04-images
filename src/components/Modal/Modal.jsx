@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 
 import css from './Modal.module.css';
 
-const Modal = ({ largeImage, onClose }) => {
+const Modal = ({ largeImage = '', onClose = () => { } }) => {
 
     return (
         <div className={css.overlay} onClick={onClose}>

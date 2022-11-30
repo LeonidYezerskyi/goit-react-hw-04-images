@@ -4,7 +4,7 @@ import PropTypes from "prop-types";
 import ImageGalleryItem from 'components/ImageGalleryItem/ImageGalleryItem';
 import css from './ImageGallery.module.css';
 
-const ImageGallery = ({ photos, onClick }) => {
+const ImageGallery = ({ photos = [], onClick = () => { } }) => {
     return (
         <ul className={css.imageGallery}>
             {photos.map(({ id, webformatURL, largeImageURL }) => {
@@ -15,7 +15,7 @@ const ImageGallery = ({ photos, onClick }) => {
 }
 
 ImageGallery.propTypes = {
-    photos: PropTypes.array.isRequired,
+    photos: PropTypes.arrayOf(PropTypes.object).isRequired,
     onClick: PropTypes.func.isRequired
 };
 

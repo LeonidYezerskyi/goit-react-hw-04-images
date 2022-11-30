@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 
 import css from './ImageGalleryItem.module.css';
 
-const ImageGalleryItem = ({ src, onClick, largeImageURL }) => {
+const ImageGalleryItem = ({ src = '', onClick = () => { }, largeImageURL = '' }) => {
     return (
         <li className={css.imageGalleryItem} >
             <img className={css.imageGalleryItemImage} onClick={() => onClick(largeImageURL)} src={src} alt="search word" />
